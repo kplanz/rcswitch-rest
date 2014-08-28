@@ -24,19 +24,32 @@ var allowCrossDomain = function(req, res, next) {
     }
 };
 
+var checkApiKey = function(req, res, next) {
+  if (req.query.apikey == null) {
+    res.send(401, { error: 'No API key supplied.' });
+  }
+  else if (req.query.apikey != api.getApiKey()) {
+    res.send(401, { error: 'API key is invalid.' });
+  }
+  else {
+    next();
+  }
+};
+
 app.configure(function(){
   app.use(express.methodOverride());
   app.use(allowCrossDomain);
   app.use(express.bodyParser());
+  app.use(checkApiKey);
 });
 
 // JSON API
 app.get('/switches', api.switches);
 app.get('/switches/:id', api.switch);
-app.post('/switches', api.addSwitch);
-app.put('/switches/:id', api.editSwitch);
-app.put('/switches', api.editAllSwitches);
-app.delete('/switches/:id', api.deleteSwitch);
+app.get('/switches/:id/switch', api.editSwitch);
+app.get('/groups', api.groups);
+app.get('/groups/:id', api.group);
+app.get('/groups/:id/switch', api.editGroup);
 
 // Start server
 app.listen(8000);

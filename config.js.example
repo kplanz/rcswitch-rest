@@ -1,0 +1,20 @@
+
+// Define an API key to secure your API.
+exports.apiKey = "APIKEY";
+
+// Define the different switches.
+exports.switches = [
+	{
+	  "id": "0", "url": "/switches/0", "name": "Living Room", "script": "sudo /home/pi/rcswitch-pi/send", "command": "01111 2", "status": "0"
+	},
+	{
+	  "id": "1", "url": "/switches/1", "name": "Bedroom", "script": "sudo /home/pi/rcswitch-pi/send", "command": "01111 3", "status": "0"
+	},
+];
+
+// Define groups of switches.
+exports.groups = [
+	{
+		"id": 0, "url": "/groups/0", "name": "Wohnzimmer", "switches": [0, 1]
+	},
+];

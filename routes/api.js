@@ -2,79 +2,70 @@
 var util = require('util')
 var exec = require('child_process').exec;
 var sleep = require('sleep');
+var config = require('../config.js')
 
-var data = [
-    {
-      "id": "0", "url": "/switches/0", "name": "Lamp 1", "script": "sudo /home/pi/rcswitch-pi/sendRev", "command": "B 1", "status": "0"
-    },
-    {
-      "id": "1", "url": "/switches/1", "name": "Lamp 2", "script": "sudo /home/pi/rcswitch-pi/sendRev", "command": "B 2", "status": "0"
-    },
-    {
-      "id": "2", "url": "/switches/2", "name": "Lamp 3", "script": "sudo /home/pi/rcswitch-pi/sendRev", "command": "B 3", "status": "0"
-    }   
-  ];
 
-// GET
+var apiKey = config.apiKey;
+var switches = config.switches;
+var groups = config.groups;
+
+exports.getApiKey = function() {
+	return apiKey;
+}
+
 exports.switches = function (req, res) {
   console.log('Getting switches.');
-  var switches = [];
-  res.json(data);
+  res.json(switches);
 };
 
 exports.switch = function (req, res) {
   var id = req.params.id;
-  if (id >= 0 && id < data.length) {
-    res.json(data[id]);
+  if (id >= 0 && id < switches.length) {
+    res.json(switches[id]);
   } else {
     res.json(404);
   }
 };
 
-// POST
-exports.addSwitch = function (req, res) {
-  var newSwitch = req.body;
-  newSwitch.id=data.length;
-  newSwitch.url="/switches/"+newSwitch.id;
-  newSwitch.status="0";
-  console.log('Adding switch: ' + JSON.stringify(newSwitch));
-  data.push(newSwitch);
-  res.send(201);
+exports.groups = function (req, res) {
+  console.log('Getting groups.');
+  res.json(groups);
 };
 
-// PUT
+exports.group = function (req, res) {
+  var id = req.params.id;
+  if (id >= 0 && id < groups.length) {
+    res.json(groups[id]);
+  } else {
+    res.json(404);
+  }
+};
+
 exports.editSwitch = function (req, res) {
   var id = req.params.id;
-  if (id >= 0 && id <= data.length) {
-    console.log('Switch Status of switch with id: ' + id + " to " + req.body.status);
-    var script = data[id].script;
-    var command = data[id].command;
-    switchStatus(script,command,req.body.status);
-    data[id].status = req.body.status;
+  if (id >= 0 && id <= switches.length) {
+    console.log('Switch Status of switch with id: ' + id + " to " + req.query.status);
+    var script = switches[id].script;
+    var command = switches[id].command;
+    switchStatus(script,command,req.query.status);
+    switches[id].status = req.query.status;
     res.send(200);
   } else {
     res.json(404);
   }
 };
 
-// PUT
-exports.editAllSwitches = function (req, res) {
-  console.log('Switch Status of all switches to ' + req.body.status);
-  for (var i=0;i<data.length;i++){ 
-    var script = data[i].script;
-    var command = data[i].command;
-    switchStatus(script,command,req.body.status);
-    data[i].status = req.body.status;
-  }
-  res.send(200);
-};
-
-// DELETE
-exports.deleteSwitch = function (req, res) {
+exports.editGroup = function (req, res) {
   var id = req.params.id;
-  if (id >= 0 && id < data.length) {
-    console.log('Delete switch with id: ' + id);
-    data.splice(id, 1);
+  if (id >= 0 && id <= groups.length) {
+    console.log('Switch Status of group with id: ' + id + " to " + req.query.status);
+    for (var i=0; i<groups[id].switches.length; i++){
+    	var switchId = groups[id].switches[i];
+	 	var script = switches[switchId].script;
+	    var command = switches[switchId].command;
+	    switchStatus(script,command,req.query.status);
+	    switches[switchId].status = req.query.status;	
+    }
     res.send(200);
   } else {
     res.json(404);
